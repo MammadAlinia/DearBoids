@@ -181,7 +181,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 15
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -301,9 +301,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FlockingBirds
   birdPrefab: {fileID: 1798233150445133640, guid: 580fa3cdc4d775946bde5e5e99b54e48, type: 3}
-  birdCount: 51
-  speed: 0.5
-  scale: 0.426
+  birdCount: 100
+  speed: 10
+  scale: 15.4
+  separationStrength: 0.17
+  alignmentFactor: 0.3
+  separationRange: 1.55
+  visibleRange: 3.78
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
