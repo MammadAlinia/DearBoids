@@ -117,9 +117,9 @@ public class FlockingBirds : MonoBehaviour
             {
                 avgVisibleVelocity /= inRangeBoidIndices.Count;
                 avgVisibleVelocity = (avgVisibleVelocity - boid.Velocity) * alignmentStrength;
-            
+
                 avgCenterPosition /= inRangeBoidIndices.Count;
-                avgCenterPosition *= cohesionStrength;
+                avgCenterPosition = (avgCenterPosition - boid.Position) * cohesionStrength;
             }
 
 
@@ -150,7 +150,7 @@ public class FlockingBirds : MonoBehaviour
 
             boid.Velocity = velocity;
 
-            var finalVelocity = (boid.Velocity.normalized + separationVector + avgVisibleVelocity);
+            var finalVelocity = (boid.Velocity.normalized + separationVector + avgVisibleVelocity + avgCenterPosition);
 
 
             // final velocity

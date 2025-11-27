@@ -301,13 +301,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FlockingBirds
   birdPrefab: {fileID: 1798233150445133640, guid: 580fa3cdc4d775946bde5e5e99b54e48, type: 3}
-  birdCount: 100
-  speed: 10
-  scale: 15.4
-  separationStrength: 0.17
-  alignmentFactor: 0.3
-  separationRange: 1.55
-  visibleRange: 3.78
+  birdCount: 984
+  speed: 4.32
+  scale: 37.8
+  separationStrength: 0.12
+  alignmentStrength: 0.01
+  cohesionStrength: 0.5
+  separationRange: 2.02
+  visibleRange: 5.27
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
