@@ -1,59 +1,129 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
+public struct BoidData
+{
+    public Vector3 Position;
+    public Vector3 Velocity;
+}
+
 public class FlockingBirds : MonoBehaviour
 {
     public Transform birdPrefab;
     [Range(1, 1000)] public int birdCount;
-    [Range(0f, 100f)] public float speed;
+    [Range(0.0001f, 10f)] public float speed;
     [Range(5, 100f)] public float scale = 15f;
-    [Range(0.01f, 5f)] public float separationStrength = 0.5f;
-    [Range(0.01f, 5f)] public float alignmentFactor = 0.5f;
 
-    [Range(0.01f, 10f)] public float separationRange = 2f;
+    [Header("Strength")] [Range(0.0f, 10f)]
+    public float separationStrength = 0.5f;
+
+    [Range(0.0f, 1f)] public float alignmentStrength = 0.5f;
+    [Range(0.0f, 1f)] public float cohesionStrength = 0.5f;
+
+    [Header("Range")] [Range(0.01f, 10f)] public float separationRange = 2f;
     [Range(0.01f, 10f)] public float visibleRange = 5f;
 
-    private Transform[] _birds;
+    private Transform[] transforms;
 
-    private Vector2[] _velocities;
+    private BoidData[] boidsData;
 
 
     private void Start()
     {
-        _birds = new Transform[birdCount];
-        _velocities = new Vector2[birdCount];
+        transforms = new Transform[birdCount];
+        boidsData = new BoidData[birdCount];
+        Application.targetFrameRate = 60;
 
-        for (int i = 0; i < _birds.Length; i++)
+        for (int i = 0; i < transforms.Length; i++)
         {
-            _birds[i] = Instantiate(birdPrefab, transform);
-            _birds[i].position = Random.insideUnitCircle * 5;
-            _birds[i].localScale = Vector3.one + Vector3.up / 2;
-            _velocities[i] = new Vector2(Random.value, Random.value);
-            _birds[i].up = _velocities[i];
+            boidsData[i].Position = Random.insideUnitCircle * 5;
+            boidsData[i].Velocity = new Vector2(Random.value, Random.value).normalized;
+
+
+            transforms[i] = Instantiate(birdPrefab, transform);
+            transforms[i].localScale = Vector3.one + Vector3.up / 2;
+            transforms[i].up = boidsData[i].Velocity;
         }
     }
 
     private void Update()
     {
         Camera.main.orthographicSize = scale;
+        var cameraS = Camera.main.OrthographicBounds().size * 0.45f;
 
-        for (int i = 0; i < _birds.Length; i++)
+        float xRange = cameraS.x;
+        float yRange = cameraS.y;
+
+        for (int i = 0; i < boidsData.Length; i++)
+
         {
-            var bird = _birds[i];
+            var boid = boidsData[i];
 
-            //visual
-            var velocity = _velocities[i];
+            var transformObj = transforms[i];
 
 
-            var cameraS = Camera.main.OrthographicBounds().size * 0.45f;
-            float xRange = cameraS.x;
-            float yRange = cameraS.y;
-            var birdPosition = bird.position;
+            var velocity = boidsData[i].Velocity;
 
+
+            var birdPosition = boid.Position;
+
+
+            // separation
+
+            var closeBoidIndices = new List<int>();
+            var inRangeBoidIndices = new List<int>();
+
+            var separationVector = Vector3.zero;
+            var avgVisibleVelocity = Vector3.zero;
+            var avgCenterPosition = Vector3.zero;
+
+            for (int bi = 0; bi < boidsData.Length; bi++) // optimize using spatial hashing or other search methods
+            {
+                if (i == bi) continue; // don't count the current boid  
+
+                var cBoid = boidsData[bi];
+                var distance = Vector3.Distance(birdPosition, cBoid.Position);
+
+                //separation rules
+                if (distance <= separationRange)
+                {
+                    closeBoidIndices.Add(bi);
+                    separationVector += (boid.Position - cBoid.Position);
+                }
+
+                // alignment
+                if (distance <= visibleRange)
+                {
+                    inRangeBoidIndices.Add(bi);
+                    avgVisibleVelocity += boidsData[bi].Velocity;
+
+                    // Cohesion
+                    avgCenterPosition += boidsData[bi].Position;
+                }
+            }
+
+            if (closeBoidIndices.Count > 0)
+            {
+                // separationVector /= closeBoidIndices.Count;
+                separationVector *= (separationStrength);
+            }
+
+            if (inRangeBoidIndices.Count > 0)
+            {
+                avgVisibleVelocity /= inRangeBoidIndices.Count;
+                avgVisibleVelocity = (avgVisibleVelocity - boid.Velocity) * alignmentStrength;
+            
+                avgCenterPosition /= inRangeBoidIndices.Count;
+                avgCenterPosition *= cohesionStrength;
+            }
+
+
+            // screen edges
             if (birdPosition.y < -yRange && velocity.y < 0)
             {
                 velocity = Vector2.Reflect(velocity, Vector3.down);
@@ -78,54 +148,19 @@ public class FlockingBirds : MonoBehaviour
                 birdPosition = new Vector3(xRange, birdPosition.y, birdPosition.z);
             }
 
+            boid.Velocity = velocity;
 
-            // separation
-            var closeNeighbors = _birds
-                .Where(x => Vector2.Distance(x.position, birdPosition) < separationRange && x != bird).ToArray();
-            var separationVector = Vector2.zero;
+            var finalVelocity = (boid.Velocity.normalized + separationVector + avgVisibleVelocity);
 
-            if (closeNeighbors.Length > 0)
-            {
-                foreach (var neighbor in closeNeighbors)
-                {
-                    separationVector += ((Vector2)birdPosition - (Vector2)neighbor.position);
-                }
-
-                //     separationVector /= closeNeighbors.Length;
-                separationVector *= separationStrength;
-            }
-
-
-            // alignment
-
-            var visibleNeighbors = _birds
-                .Where(x =>
-                {
-                    var dist = Vector2.Distance(x.position, birdPosition);
-                    return dist < visibleRange && dist > separationRange && x != bird;
-                }).ToArray();
-
-            var avgNeighborVelocity = Vector2.zero;
-
-            if (visibleNeighbors.Length > 0)
-            {
-                foreach (var neighbor in visibleNeighbors)
-                {
-                    avgNeighborVelocity += (Vector2)neighbor.position;
-                }
-
-                avgNeighborVelocity /= visibleNeighbors.Length;
-                avgNeighborVelocity *= alignmentFactor;
-            }
-
-            // Cohesion
 
             // final velocity
-            var finalVelocity = (velocity.normalized + separationVector - avgNeighborVelocity) *
-                                (speed * Time.deltaTime);
-            _velocities[i] = finalVelocity;
-            bird.position = birdPosition + new Vector3(finalVelocity.x, finalVelocity.y, 0);
-            bird.up = velocity.normalized;
+            boid.Position = birdPosition + new Vector3(finalVelocity.x, finalVelocity.y, 0) * (speed * Time.deltaTime);
+            boid.Velocity = finalVelocity;
+            boidsData[i] = boid;
+
+            // visual
+            transformObj.position = boid.Position;
+            transformObj.up = boid.Velocity.normalized;
         }
     }
 }
