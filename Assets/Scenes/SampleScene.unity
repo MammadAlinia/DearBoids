@@ -302,14 +302,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FlockingBirds
   birdMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   birdMaterial: {fileID: 2100000, guid: 6effa2646229ba44a8c5919dc25f5914, type: 2}
-  birdCount: 5500
-  speed: 4.32
-  scale: 44.5
-  separationStrength: 0.12
-  alignmentStrength: 0.04
-  cohesionStrength: 0.004
+  birdCount: 1000
+  speed: 34
+  scale: 53.9
+  separationStrength: 0.41
+  alignmentStrength: 0.313
+  cohesionStrength: 0.527
   separationRange: 2.02
   visibleRange: 5.27
+  turnFactor: 5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
