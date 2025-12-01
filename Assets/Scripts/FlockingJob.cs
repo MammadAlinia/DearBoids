@@ -13,6 +13,7 @@ public struct FlockingJob : IJobParallelFor
 
     [WriteOnly] public NativeArray<Boid> BoidsDataOut;
     public NativeArray<Matrix4x4> VisualData;
+    public NativeArray<uint> boidsInRangeCount;
 
     public float CellSize;
     public float TurnFactor;
@@ -44,7 +45,7 @@ public struct FlockingJob : IJobParallelFor
         int maxCheck = 500;
         int checkedBoids = 0;
 
-        // Check 8 neighboring cells (3x3x3)
+        // Check 8 neighboring cells (3x3)
         for (int x = -1; x <= 1; x++)
         {
             for (int y = -1; y <= 1; y++)
@@ -58,20 +59,20 @@ public struct FlockingJob : IJobParallelFor
                     do
                     {
                         if (otherIndex == i) continue;
-
                         var otherBoid = BoidsDataIn[otherIndex];
+                        if (math.dot(velocity, math.normalize(otherBoid.Position - position)) < -0.33f) continue;
                         var distance = math.distance(otherBoid.Position, position);
                         checkedBoids++;
 
                         // Avoidance
-                        if (distance <= AvoidanceRange && distance > 0.001f)
+                        if (distance <= AvoidanceRange && distance > 0.0001f)
                         {
                             closeBoidsCount++;
                             avoidanceVector += (position - otherBoid.Position) / distance;
                         }
 
                         // Alignment & Cohesion
-                        if (distance <= AlignmentRange)
+                        if (currentBoid.GroupID == otherBoid.GroupID && distance <= AlignmentRange)
                         {
                             avgVelocityVector += otherBoid.Velocity;
                             avgPosition += otherBoid.Position;
@@ -130,6 +131,7 @@ public struct FlockingJob : IJobParallelFor
             quaternion.LookRotation(new float3(0f, 0f, 1f), direction),
             new float3(0.5f, 1f, 1f)
         );
+        boidsInRangeCount[i] = (uint)inRangeBoidsCount;
     }
 
     private static int Hash(int3 gridPos)

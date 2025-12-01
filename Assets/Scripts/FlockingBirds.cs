@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Flocking;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
@@ -23,18 +25,25 @@ public class FlockingBirds : MonoBehaviour
     [Header("Strength")] [Range(0.0f, 10f)]
     public float separationStrength = 0.5f;
 
-    [Range(0.0f, 1f)] public float alignmentStrength = 0.5f;
-    [Range(0.0f, 1f)] public float cohesionStrength = 0.5f;
+    [Range(0.0f, 10f)] public float alignmentStrength = 0.5f;
+    [Range(0.0f, 10f)] public float cohesionStrength = 0.5f;
 
     [Header("Range")] [Range(0.01f, 10f)] public float avoidanceRange = 2f;
     [Range(0.01f, 10f)] public float alignmentRange = 5f;
     [Range(0.01f, 10f)] public float turnFactor = 5f;
 
 
-    public NativeArray<Boid> boids;
+    public NativeArray<Boid> boidsData;
     private NativeArray<Boid> boidsOut;
     public NativeArray<Matrix4x4> visualData;
+
     private NativeParallelMultiHashMap<int, int> spatialHash;
+    private NativeArray<uint> boidsInRangeCount;
+
+    public NativeArray<Color> boidsColor;
+    private ComputeBuffer colorBuffer;
+    private MaterialPropertyBlock _propertyBlock;
+    private static readonly int colorPropertyID = Shader.PropertyToID("_InstanceColorBuffer");
     [Header("Grid")] public float cellSize = 2f;
 
 
@@ -42,18 +51,25 @@ public class FlockingBirds : MonoBehaviour
     {
         UpdateSpatialHash();
         visualData = new NativeArray<Matrix4x4>(boidCount, Allocator.Persistent);
-        boids = new NativeArray<Boid>(boidCount, Allocator.Persistent);
+        boidsColor = new NativeArray<Color>(boidCount, Allocator.Persistent);
+        boidsData = new NativeArray<Boid>(boidCount, Allocator.Persistent);
         boidsOut = new NativeArray<Boid>(boidCount, Allocator.Persistent);
+
         spatialHash = new NativeParallelMultiHashMap<int, int>(boidCount * 2, Allocator.Persistent);
+        boidsInRangeCount = new NativeArray<uint>(boidCount, Allocator.Persistent);
 
+        colorBuffer = new ComputeBuffer(boidsData.Length, sizeof(float) * 4);
+        _propertyBlock = new MaterialPropertyBlock();
 
-        for (int i = 0; i < boids.Length; i++)
+        for (int i = 0; i < boidsData.Length; i++)
         {
-            var wordP = new float3(Random.value*scale, Random.value*scale, 0);
-            boids[i] = new Boid()
+            var wordP = new float3(Random.Range(-1f,1f) * scale, Random.Range(-1f,1f) * scale, 0);
+            boidsData[i] = new Boid()
             {
                 Position = wordP,
-                Velocity = new float3(Random.value*scale, Random.value*scale, 0),
+                Velocity = new float3(-Random.Range(-1f,1f) * scale, Random.Range(-1f,1f)* scale, 0),
+               // GroupID = (uint)(i % 2 == 0 ? 0 : 1)
+               GroupID = (uint)Random.Range(0,3)
             };
         }
 
@@ -70,36 +86,42 @@ public class FlockingBirds : MonoBehaviour
 
     private void OnDisable()
     {
-        if (boids.IsCreated) boids.Dispose();
+        if (boidsData.IsCreated) boidsData.Dispose();
         if (boidsOut.IsCreated) boidsOut.Dispose();
         if (spatialHash.IsCreated) spatialHash.Dispose();
         if (visualData.IsCreated) visualData.Dispose();
+        if (boidsColor.IsCreated) boidsColor.Dispose();
+        if (boidsInRangeCount.IsCreated) boidsInRangeCount.Dispose();
+        colorBuffer?.Release();
     }
 
     private void Update()
     {
         //  FlockingSingleThread();
         FlockingJobs();
-        Graphics.RenderMeshInstanced(new RenderParams(birdMaterial) { }, birdMesh, 0, visualData);
     }
 
     private void UpdateSpatialHash()
     {
     }
 
+    public Color[] boidsColorTmp;
+    public uint[] boidsCountTmp;
 
     private void FlockingJobs()
     {
-        float cellSize = math.min(avoidanceRange, alignmentRange);
+        float cellSize = math.max(avoidanceRange, alignmentRange);
         spatialHash.Clear();
         var hashJob = new HashPositionsJob()
         {
-            boids = boids,
+            boids = boidsData,
             spatialHash = spatialHash.AsParallelWriter(),
             cellSize = cellSize
         };
-        var hashHandle = hashJob.Schedule(boids.Length, 550);
-        var job = new FlockingJob()
+        var hashHandle = hashJob.Schedule(boidsData.Length, 550);
+
+
+        var flockingJob = new FlockingJob()
         {
             AvoidanceRange = avoidanceRange,
             AvoidanceForce = separationStrength,
@@ -107,7 +129,7 @@ public class FlockingBirds : MonoBehaviour
             AlignmentRange = alignmentRange,
             TurnFactor = turnFactor,
             CohesionForce = cohesionStrength,
-            BoidsDataIn = boids,
+            BoidsDataIn = boidsData,
             BoidsDataOut = boidsOut,
             DeltaTime = Time.deltaTime,
             Speed = speed,
@@ -115,17 +137,44 @@ public class FlockingBirds : MonoBehaviour
             XRange = xRange,
             YRange = yRange,
             spatialHash = spatialHash,
-            CellSize = cellSize
+            CellSize = cellSize,
+            boidsInRangeCount = boidsInRangeCount
         };
-
-
-        var handle = job.Schedule(boids.Length, 550, hashHandle);
+        var flockingJobHandle = flockingJob.Schedule(boidsData.Length, 550, hashHandle);
+        var boidsColorJob = new BoidsColorJob()
+        {
+            boidsColor = boidsColor,
+            BoidsData = boidsData
+        };
+        var handle = boidsColorJob.Schedule(boidsData.Length, 550, flockingJobHandle);
         handle.Complete();
-        (boids, boidsOut) = (boidsOut, boids);
+        (boidsData, boidsOut) = (boidsOut, boidsData);
+        colorBuffer.SetData(boidsColor);
+        _propertyBlock.SetBuffer(colorPropertyID, colorBuffer);
+
+        Graphics.RenderMeshInstanced(new RenderParams(mat: birdMaterial)
+            {
+                matProps = _propertyBlock
+            }
+            , birdMesh, 0, visualData);
     }
+}
 
+[BurstCompile]
+public struct BoidsColorJob : IJobParallelFor
+{
+    [ReadOnly] public NativeArray<Boid> BoidsData;
+    public NativeArray<Color> boidsColor;
 
-    private void OnDrawGizmos()
+    public void Execute(int i)
     {
+        if (BoidsData[i].GroupID == 0)
+            boidsColor[i] = Color.teal;
+        if (BoidsData[i].GroupID == 1)
+            boidsColor[i] = Color.forestGreen;
+        if (BoidsData[i].GroupID == 2)
+            boidsColor[i] = Color.paleVioletRed;
+        if (BoidsData[i].GroupID == 3)
+            boidsColor[i] = Color.red;
     }
 }

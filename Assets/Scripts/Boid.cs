@@ -10,13 +10,13 @@ namespace Flocking
     {
         public float3 Position;
         public float3 Velocity;
-        public int2 GridCell;
+        public uint  GroupID;
 
-        public Boid(float3 position, float3 velocity, int2 gridCell)
+        public Boid(float3 position, float3 velocity, uint groupID)
         {
             Position = position;
             Velocity = velocity;
-            GridCell = gridCell;
+            GroupID = groupID;
         }
     }
 }
