@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Flocking;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -50,11 +49,11 @@ public class FlockingBirds : MonoBehaviour
 
         for (int i = 0; i < boids.Length; i++)
         {
-            var wordP = new float3(Random.value, Random.value, 0);
+            var wordP = new float3(Random.value*scale, Random.value*scale, 0);
             boids[i] = new Boid()
             {
                 Position = wordP,
-                Velocity = new float3(Random.value, Random.value, 0),
+                Velocity = new float3(Random.value*scale, Random.value*scale, 0),
             };
         }
 
@@ -81,6 +80,7 @@ public class FlockingBirds : MonoBehaviour
     {
         //  FlockingSingleThread();
         FlockingJobs();
+        Graphics.RenderMeshInstanced(new RenderParams(birdMaterial) { }, birdMesh, 0, visualData);
     }
 
     private void UpdateSpatialHash()
@@ -90,7 +90,7 @@ public class FlockingBirds : MonoBehaviour
 
     private void FlockingJobs()
     {
-        float cellSize = math.max(avoidanceRange, alignmentRange);
+        float cellSize = math.min(avoidanceRange, alignmentRange);
         spatialHash.Clear();
         var hashJob = new HashPositionsJob()
         {
@@ -122,40 +122,8 @@ public class FlockingBirds : MonoBehaviour
         var handle = job.Schedule(boids.Length, 550, hashHandle);
         handle.Complete();
         (boids, boidsOut) = (boidsOut, boids);
-        Graphics.DrawMeshInstanced(birdMesh, 0, birdMaterial, visualData.ToList());
     }
 
-    [BurstCompile]
-    public struct HashPositionsJob : IJobParallelFor
-    {
-        [ReadOnly] public NativeArray<Boid> boids;
-        [WriteOnly] public NativeParallelMultiHashMap<int, int>.ParallelWriter spatialHash;
-        public float cellSize;
-
-        public void Execute(int index)
-        {
-            var gridPos = GetGridPosition(boids[index].Position, cellSize);
-            var hash = Hash(gridPos);
-            spatialHash.Add(hash, index);
-        }
-
-        private static int Hash(int3 gridPos)
-        {
-            unchecked
-            {
-                return gridPos.x * 73856093 ^ gridPos.y * 19349663 ^ gridPos.z * 83492791;
-            }
-        }
-
-        private static int3 GetGridPosition(float3 position, float size)
-        {
-            return new int3(
-                (int)math.floor(position.x / size),
-                (int)math.floor(position.y / size),
-                (int)math.floor(position.z / size)
-            );
-        }
-    }
 
     private void OnDrawGizmos()
     {

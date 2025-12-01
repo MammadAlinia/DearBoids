@@ -41,8 +41,10 @@ public struct FlockingJob : IJobParallelFor
         var avgPosition = float3.zero;
 
         var gridPos = GetGridPosition(position, CellSize);
+        int maxCheck = 500;
+        int checkedBoids = 0;
 
-        // Check 27 neighboring cells (3x3x3)
+        // Check 8 neighboring cells (3x3x3)
         for (int x = -1; x <= 1; x++)
         {
             for (int y = -1; y <= 1; y++)
@@ -59,6 +61,7 @@ public struct FlockingJob : IJobParallelFor
 
                         var otherBoid = BoidsDataIn[otherIndex];
                         var distance = math.distance(otherBoid.Position, position);
+                        checkedBoids++;
 
                         // Avoidance
                         if (distance <= AvoidanceRange && distance > 0.001f)
@@ -74,7 +77,7 @@ public struct FlockingJob : IJobParallelFor
                             avgPosition += otherBoid.Position;
                             inRangeBoidsCount++;
                         }
-                    } while (spatialHash.TryGetNextValue(out otherIndex, ref iterator));
+                    } while (checkedBoids < maxCheck && spatialHash.TryGetNextValue(out otherIndex, ref iterator));
                 }
             }
         }

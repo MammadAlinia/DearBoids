@@ -302,9 +302,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FlockingBirds
   birdMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   birdMaterial: {fileID: 2100000, guid: 6effa2646229ba44a8c5919dc25f5914, type: 2}
-  boidCount: 413
+  boidCount: 50000
   speed: 34
-  scale: 53.9
+  scale: 73.4
   separationStrength: 3.79
   alignmentStrength: 0.313
   cohesionStrength: 0.527
