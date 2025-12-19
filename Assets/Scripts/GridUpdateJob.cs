@@ -3,16 +3,17 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Flocking.Grid
 {
     [BurstCompile]
     public struct GridUpdateJob : IJob
     {
-        public NativeArray<float4x4> CellPositions;
         public float CellSize;
         public int2 GridSize;
         public WorldPartition Partition;
+        public NativeArray<ItemInstanceData> Instances;
 
         public void Execute()
         {
@@ -22,11 +23,17 @@ namespace Flocking.Grid
                 {
                     var offset = math.round((new float3(GridSize.x, GridSize.y, 0f) / 2f)) * CellSize;
                     var wp = Partition.ToWorldPosition(new int3(x, y, 0)) - offset;
-                    CellPositions[y * GridSize.x + x] =
-                        float4x4.TRS(
-                            translation: wp,
-                            quaternion.identity,
-                            new float3(1f, 1f, 1f) * CellSize);
+
+                    var matrix = float4x4.TRS(
+                        translation: wp,
+                        quaternion.identity,
+                        new float3(1f, 1f, 1f) * CellSize);
+                    Instances[y * GridSize.x + x] = new ItemInstanceData()
+                    {
+                        Matrix = matrix,
+                        MatrixInverse = math.inverse(matrix),
+                        Color = Color.white
+                    };
                 }
             }
         }

@@ -103,6 +103,7 @@ public class InstancedRenderBatch<T> : IDisposable where T : struct
     {
         ReleaseBuffer(ref _dataBuffer);
         ReleaseBuffer(ref _argsBuffer);
+        
     }
 
     private void ReleaseBuffer(ref ComputeBuffer buffer)

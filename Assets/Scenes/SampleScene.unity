@@ -528,10 +528,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e323fe4ac5114ce49daadc89e9f281de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DefaultNamespace.SpatialPartitionTest
-  drawGizmo: 1
+  drawGizmo: 0
   material: {fileID: 2100000, guid: 1459361a19d99d2419ea3ea7f27bc5b1, type: 2}
   mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
-  CellSize: 0.54
+  CellSize: 1.91
   GridSize:
     x: 24
     y: 11
