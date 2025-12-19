@@ -1,22 +1,17 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Mathematics;
 
 namespace Flocking
 {
     [BurstCompile]
-    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
     public struct Boid
     {
-        public float3 Position;
+        public float4x4 objectToWorld;
         public float3 Velocity;
-        public uint  GroupID;
+        public uint GroupID;
 
-        public Boid(float3 position, float3 velocity, uint groupID)
-        {
-            Position = position;
-            Velocity = velocity;
-            GroupID = groupID;
-        }
     }
 }

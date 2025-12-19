@@ -7,14 +7,15 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Shader Graphs_Boids
-  m_Shader: {fileID: -6465566751694194690, guid: fd719f74b2aee0d4498a40aa798b1b2f, type: 3}
+  m_Name: Shader Graphs_IndirectInsance
+  m_Shader: {fileID: -6465566751694194690, guid: 6b44589d9a4727d4e9a37a8a5dffd26a, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _PROCEDURAL_INSTANCING_ON
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 1
+  m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
@@ -38,13 +39,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - PROCEDURAL_INSTANCING: 1
+    - _PROCEDURAL_INSTANCING: 1
     - _QueueControl: 0
     - _QueueOffset: 0
-    m_Colors:
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _UNITY_PROCEDURAL_INSTANCING_ENABLED: 1
+    m_Colors: []
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &2626068170505178728
+--- !u!114 &6716896945630313693
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
