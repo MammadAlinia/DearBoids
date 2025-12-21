@@ -26,6 +26,7 @@ public struct FlockingJob : IJobParallelFor
     public float XRange;
     public float YRange;
     public float ZRange;
+    public NativeArray<InstanceData> InstanceData;
 
     public void Execute(int i)
     {
@@ -145,6 +146,10 @@ public struct FlockingJob : IJobParallelFor
         currentBoid.Velocity = velocity;
 
         BoidsDataOut[i] = currentBoid;
+        var instanceData = InstanceData[i];
+        instanceData.Matrix = currentBoid.objectToWorld;
+        instanceData.MatrixInverse = math.inverse(currentBoid.objectToWorld);
+        InstanceData[i] = instanceData;
     }
 
     public float maxSpeed;

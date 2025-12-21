@@ -13,7 +13,7 @@ namespace Flocking.Grid
         public float CellSize;
         public int2 GridSize;
         public WorldPartition Partition;
-        public NativeArray<ItemInstanceData> Instances;
+        public NativeArray<InstanceData> Instances;
 
         public void Execute()
         {
@@ -28,7 +28,7 @@ namespace Flocking.Grid
                         translation: wp,
                         quaternion.identity,
                         new float3(1f, 1f, 1f) * CellSize);
-                    Instances[y * GridSize.x + x] = new ItemInstanceData()
+                    Instances[y * GridSize.x + x] = new InstanceData()
                     {
                         Matrix = matrix,
                         MatrixInverse = math.inverse(matrix),

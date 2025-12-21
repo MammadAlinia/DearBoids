@@ -11,11 +11,14 @@ StructuredBuffer<InstanceItemData> _PerInstanceItemData;
 
 // https://github.com/Unity-Technologies/Graphics/blob/master/com.unity.shadergraph/Editor/Generation/Targets/BuiltIn/ShaderLibrary/ParticlesInstancing.hlsl
 void instancingItemSetup() {
+    #if UNITY_ANY_INSTANCING_ENABLED
+    
     #ifndef SHADERGRAPH_PREVIEW
     unity_ObjectToWorld = mul(unity_ObjectToWorld, _PerInstanceItemData[unity_InstanceID].worldMatrix);
     unity_WorldToObject = mul(unity_WorldToObject, _PerInstanceItemData[unity_InstanceID].worldMatrixInverse);
     #endif
-}
+    #endif
+    }
 
 void GetInstanceItemID_float(out float Out){
     Out = 0;

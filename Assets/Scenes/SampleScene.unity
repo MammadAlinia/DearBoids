@@ -181,7 +181,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 7.22
+  orthographic size: 15.12
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -272,7 +272,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &816477243
 Transform:
   m_ObjectHideFlags: 0
@@ -301,16 +301,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FlockingBirds
   quad: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
-  birdMaterial: {fileID: 2100000, guid: b26266717f9c1e148ad6f50c03879c15, type: 2}
-  gridMaterial: {fileID: 2100000, guid: 5fe8eeb8a19085b498f786b1ce8dc193, type: 2}
-  boidCount: 4890
-  speed: 1.1
-  scale: 53
-  separationStrength: 1.16
+  birdMaterial: {fileID: 2100000, guid: 6e960f7ddccf95240b0bbc45a4cc11e1, type: 2}
+  boidCount: 14223
+  speed: 2.7
+  scale: 117
+  separationStrength: 4.04
   alignmentStrength: 0.3
-  cohesionStrength: 0.05
+  cohesionStrength: 0.84
   avoidanceRange: 1.48
-  alignmentRange: 5
+  alignmentRange: 2.9
   turnFactor: 1
   minSpeed: 10
   maxSpeed: 10
@@ -515,7 +514,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1736072242
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -531,7 +530,7 @@ MonoBehaviour:
   drawGizmo: 0
   material: {fileID: 2100000, guid: 1459361a19d99d2419ea3ea7f27bc5b1, type: 2}
   mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
-  CellSize: 1.91
+  CellSize: 2
   GridSize:
     x: 24
     y: 11

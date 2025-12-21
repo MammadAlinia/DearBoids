@@ -14,7 +14,7 @@ namespace Flocking.Grid
         public float3 mousePosition;
         public float cellSize;
         public int2 GridSize;
-        public NativeArray<ItemInstanceData> Instances;
+        public NativeArray<InstanceData> Instances;
 
         public void Execute()
         {
@@ -36,7 +36,7 @@ namespace Flocking.Grid
 
                     if (gPos.Equals(Partition.ToPartition(mousePosition)))
                     {
-                        data.Color = Color.red;
+                        data.Color = Color.blue;
                     }
                     else
                     {
