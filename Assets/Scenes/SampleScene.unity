@@ -267,7 +267,7 @@ GameObject:
   - component: {fileID: 816477243}
   - component: {fileID: 816477244}
   m_Layer: 0
-  m_Name: Flocking
+  m_Name: Gameplay
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -297,27 +297,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 816477242}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0987f2569c1a8b242ba1121d33d8dda4, type: 3}
+  m_Script: {fileID: 11500000, guid: 78e2c379e1ba4dcfa9972ae427f491e1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FlockingBirds
-  quad: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
-  birdMaterial: {fileID: 2100000, guid: 6e960f7ddccf95240b0bbc45a4cc11e1, type: 2}
-  boidCount: 14223
-  speed: 2.7
-  scale: 117
-  separationStrength: 4.04
-  alignmentStrength: 0.3
-  cohesionStrength: 0.84
-  avoidanceRange: 1.48
-  alignmentRange: 2.9
-  turnFactor: 1
-  minSpeed: 10
-  maxSpeed: 10
+  m_EditorClassIdentifier: Assembly-CSharp::DearBoids.Gameplay
+  flockingSetting: {fileID: 11400000, guid: 5c57b0810205a94409a8849e307fd1a4, type: 2}
+  renderingSetting: {fileID: 11400000, guid: 886e915b37933254bb1483e3901263c7, type: 2}
+  count: 50000
   cellSize: 1
-  gridSize: 0
+  scale: 250
   xRange: 0
   yRange: 0
   cameraS: {x: 0, y: 0, z: 0}
+  _flockingSystem:
+    cellSize: 2
+    avoidanceRange: 0
+    boidMaxSpeed: 0
+    boidMinSpeed: 0
+    cohesionStrength: 0
+    alignmentRange: 0
+    alignmentStrength: 0
+    avoidanceStrength: 0
 --- !u!1 &1030153686
 GameObject:
   m_ObjectHideFlags: 0
@@ -530,7 +529,7 @@ MonoBehaviour:
   drawGizmo: 0
   material: {fileID: 2100000, guid: 1459361a19d99d2419ea3ea7f27bc5b1, type: 2}
   mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
-  CellSize: 2
+  CellSize: 1
   GridSize:
     x: 24
     y: 11

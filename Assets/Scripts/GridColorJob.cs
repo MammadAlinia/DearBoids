@@ -5,7 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Flocking.Grid
+namespace DearBoids.Grid
 {
     [BurstCompile]
     public struct GridColorJob : IJob

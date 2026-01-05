@@ -1,5 +1,5 @@
 ﻿using System;
-using Flocking.Grid;
+using DearBoids.Grid;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -26,10 +26,10 @@ public struct InstanceData
 /// A high-performance helper for Indirect Instanced Rendering.
 /// Optimized for Unity.Mathematics and NativeArrays (Burst/Jobs compatible).
 /// </summary>
-public class InstancedRenderBatch : IDisposable
+public class InstancedRenderingSystem : IDisposable
 {
-    public static InstancedRenderBatch Default(Mesh mesh, Material material) =>
-        new InstancedRenderBatch(mesh, material, "_PerInstanceItemData");
+    public static InstancedRenderingSystem Default(Mesh mesh, Material material) =>
+        new InstancedRenderingSystem(mesh, material, "_PerInstanceItemData");
 
     private const int ARGS_COUNT = 5;
 
@@ -47,7 +47,7 @@ public class InstancedRenderBatch : IDisposable
     private readonly uint[] _args = new uint[ARGS_COUNT];
     private readonly string _bufferShaderName;
 
-    public InstancedRenderBatch(Mesh mesh, Material material, string bufferShaderName = "_InstanceData")
+    public InstancedRenderingSystem(Mesh mesh, Material material, string bufferShaderName = "_InstanceData")
     {
         Mesh = mesh;
         Material = material;
@@ -60,7 +60,7 @@ public class InstancedRenderBatch : IDisposable
     /// Uploads data from a NativeArray directly to the GPU.
     /// Fast and generates zero garbage.
     /// </summary>
-    public void UpdateData(NativeArray<InstanceData> data)
+    public void UpdateData(ref NativeArray<InstanceData> data)
     {
         int count = data.Length;
 

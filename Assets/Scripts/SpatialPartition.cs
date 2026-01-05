@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using SpatialPartition;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering;
 
-namespace Flocking.Grid
+namespace DearBoids.Grid
 {
     public class SpatialPartition : MonoBehaviour
     {
@@ -28,7 +26,7 @@ namespace Flocking.Grid
 
         Camera _camera;
         public NativeArray<InstanceData> Instances;
-        public InstancedRenderBatch InstanceRenderer;
+        public InstancedRenderingSystem InstanceRenderer;
 
         private void Initialize()
         {
@@ -44,7 +42,7 @@ namespace Flocking.Grid
 
             Instances = new NativeArray<InstanceData>(GridSize.x * GridSize.y, Allocator.Persistent);
 
-            InstanceRenderer = InstancedRenderBatch.Default(mesh, material);
+            InstanceRenderer = InstancedRenderingSystem.Default(mesh, material);
             GridUpdateJob gridUpdateJob = new GridUpdateJob()
             {
                 Instances = Instances,
@@ -87,7 +85,7 @@ namespace Flocking.Grid
 
 
             gridColorJob.Run();
-            InstanceRenderer.UpdateData(Instances);
+            InstanceRenderer.UpdateData(ref Instances);
             InstanceRenderer.Draw();
         }
 

@@ -1,4 +1,4 @@
-﻿using Flocking;
+﻿using DearBoids;
 using SpatialPartition;
 using Unity.Burst;
 using Unity.Collections;
@@ -9,12 +9,12 @@ using Unity.Mathematics;
 public struct HashPositionsJob : IJobParallelFor
 {
     [ReadOnly] public WorldPartition Partition;
-    [ReadOnly] public NativeArray<Boid> boids;
+    [ReadOnly] public NativeArray<InstanceData> instances;
     [WriteOnly] public NativeParallelMultiHashMap<int3, int>.ParallelWriter spatialHash;
 
     public void Execute(int index)
     {
-        var wp = boids[index].objectToWorld.c3.xyz;
+        var wp = instances[index].Matrix.c3.xyz;
         var gridPos = Partition.ToPartition(wp);
         spatialHash.Add(gridPos, index);
     }

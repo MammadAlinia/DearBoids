@@ -17,6 +17,7 @@ namespace SpatialPartition
                 y = gridPosition.y * CellSize,
                 z = 0
             };
+            
         }
 
         public int3 ToPartition(float3 worldPosition)

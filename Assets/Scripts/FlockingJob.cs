@@ -1,4 +1,4 @@
-using Flocking;
+using DearBoids;
 using SpatialPartition;
 using Unity.Burst;
 using Unity.Collections;
@@ -10,28 +10,30 @@ using UnityEngine;
 public struct FlockingJob : IJobParallelFor
 {
     [ReadOnly] public NativeArray<Boid> BoidsDataIn;
+    [WriteOnly] public NativeArray<Boid> BoidsDataOut;
     [ReadOnly] public NativeParallelMultiHashMap<int3, int> spatialHash;
     [ReadOnly] public WorldPartition Partition;
-    [WriteOnly] public NativeArray<Boid> BoidsDataOut;
-
+    [ReadOnly]  public NativeArray<InstanceData> InstancesIn;
+    [WriteOnly]  public NativeArray<InstanceData> InstancesOut;
     public float CellSize;
-    public float boundryWeigth;
     public float AvoidanceRange;
-    public float seperationForce;
+    public float AvoidanceStrength;
     public float AlignmentRange;
-    public float AlignmentForce;
-    public float CohesionForce;
+    public float AlignmentStrength;
+    public float CohesionStrength;
     public float DeltaTime;
     public float Speed;
-    public float XRange;
-    public float YRange;
-    public float ZRange;
-    public NativeArray<InstanceData> InstanceData;
+
+
+    public float MaxSpeed;
+    public float MinSpeed;
+   
 
     public void Execute(int i)
     {
         var currentBoid = BoidsDataIn[i];
-        var position = currentBoid.objectToWorld.c3.xyz;
+        var currentInstance = InstancesIn[i];
+        var position = currentInstance.Matrix.c3.xyz;
         var velocity = currentBoid.Velocity;
 
         // Flocking parameters
@@ -46,7 +48,7 @@ public struct FlockingJob : IJobParallelFor
         int maxCheck = 1000;
         int checkedBoids = 0;
 
-        var neighborCellsToCheck = (int)math.round((AlignmentRange / 2) / CellSize);
+        var neighborCellsToCheck = math.clamp((int)math.round((AlignmentRange / 2) / CellSize), 1, int.MaxValue);
 
         // Check 8 neighboring cells (3x3)
         for (int x = -neighborCellsToCheck; x <= neighborCellsToCheck; x++)
@@ -62,7 +64,7 @@ public struct FlockingJob : IJobParallelFor
                     {
                         if (otherIndex == i) continue;
                         var otherBoid = BoidsDataIn[otherIndex];
-                        var otherP = otherBoid.objectToWorld.c3.xyz;
+                        var otherP = InstancesIn[otherIndex].Matrix.c3.xyz;
                         var offset = position - otherP;
                         var dist = math.length(offset);
 
@@ -99,7 +101,7 @@ public struct FlockingJob : IJobParallelFor
         if (separationCount > 0)
         {
             separation /= separationCount; // Average separation
-            velocity += separation * seperationForce;
+            velocity += separation * AvoidanceStrength;
         }
 
         if (neighborCount > 0)
@@ -107,33 +109,20 @@ public struct FlockingJob : IJobParallelFor
             // Apply alignment
 
             alignment /= neighborCount; // Average position
-            velocity += (alignment - velocity) * AlignmentForce;
+            velocity += (alignment - velocity) * AlignmentStrength;
 
 
             // Apply Cohesion
             cohesion /= neighborCount;
-            velocity += (cohesion - position) * CohesionForce;
+            velocity += (cohesion - position) * CohesionStrength;
         }
 
-
-        if (position.x < -XRange)
-            velocity.x += boundryWeigth;
-
-        if (position.x > XRange)
-            velocity.x -= boundryWeigth;
-
-        if (position.y < -YRange)
-            velocity.y += boundryWeigth;
-
-        if (position.y > YRange)
-            velocity.y -= boundryWeigth;
-
-
+        
         float speed = math.length(velocity);
 
         if (speed > 0.001f)
         {
-            velocity = math.normalize(velocity) * math.clamp(speed, minSpeed, maxSpeed);
+            velocity = math.normalize(velocity) * math.clamp(speed, MinSpeed, MaxSpeed);
         }
 
         var direction = math.length(velocity) > 0.001f
@@ -141,17 +130,12 @@ public struct FlockingJob : IJobParallelFor
             : new float3(0, 1, 0);
 
         position += velocity * DeltaTime;
-        currentBoid.objectToWorld = float4x4.TRS(position,
+        currentInstance.Matrix = float4x4.TRS(position,
             quaternion.LookRotation(new float3(0, 0, 1), direction), new float3(.5f, 1, 1));
+        currentInstance.MatrixInverse = math.inverse(currentInstance.Matrix);
         currentBoid.Velocity = velocity;
 
+        InstancesOut[i] = currentInstance;
         BoidsDataOut[i] = currentBoid;
-        var instanceData = InstanceData[i];
-        instanceData.Matrix = currentBoid.objectToWorld;
-        instanceData.MatrixInverse = math.inverse(currentBoid.objectToWorld);
-        InstanceData[i] = instanceData;
     }
-
-    public float maxSpeed;
-    public float minSpeed;
 }
