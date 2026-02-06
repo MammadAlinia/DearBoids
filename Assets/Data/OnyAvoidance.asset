@@ -14,10 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DearBoids.FlockingSettingData
   avoidanceRange: 1.84
   alignmentRange: 2.6
-  avoidanceStrength: 10
+  avoidanceStrength: 6.84
   alignmentStrength: 0
   cohesionStrength: 0
   turnFactor: 1.2
+  testRange: 0
   Speed: 1
   boidMinSpeed: 10
   boidMaxSpeed: 10

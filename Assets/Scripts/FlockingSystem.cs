@@ -55,7 +55,7 @@ public class FlockingSystem : IDisposable
     {
         var boidsTemp = new NativeArray<Boid>(boidsData.Length, Allocator.TempJob);
         var instancesTemp = new NativeArray<InstanceData>(instanceData.Length, Allocator.TempJob);
-        var batchCount = (int)boidsData.Length / 24;
+        var batchCount =   12;
         spatialHash.Clear();
         var hashJob = new HashPositionsJob()
         {

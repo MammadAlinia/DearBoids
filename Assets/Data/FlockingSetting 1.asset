@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e0c12dda9bd9437381b1426af5d572c2, type: 3}
-  m_Name: FlockingSetting
+  m_Name: FlockingSetting 1
   m_EditorClassIdentifier: Assembly-CSharp::DearBoids.FlockingSettingData
   avoidanceRange: 1.5
-  alignmentRange: 3
-  avoidanceStrength: 3.96
+  alignmentRange: 4.04
+  avoidanceStrength: 1.73
   alignmentStrength: 0.05
-  cohesionStrength: 0.05
-  turnFactor: 3.29
+  cohesionStrength: 0.13
+  turnFactor: 0.58
   testRange: 0
   Speed: 1
   boidMinSpeed: 8

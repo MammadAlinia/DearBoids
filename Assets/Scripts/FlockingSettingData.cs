@@ -15,7 +15,7 @@ namespace DearBoids
         [Range(0.0f, 10f)] public float cohesionStrength = 0.03f;
         [Range(0.00f, 10f)] public float turnFactor = 5f;
 
-
+        [Range(0, 100000)] public int testRange;
         [Header("Simulation Settings")] public float Speed = 1f;
         public float boidMinSpeed = 5f;
         public float boidMaxSpeed = 10f;

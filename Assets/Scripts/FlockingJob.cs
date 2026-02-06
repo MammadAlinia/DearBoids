@@ -13,8 +13,8 @@ public struct FlockingJob : IJobParallelFor
     [WriteOnly] public NativeArray<Boid> BoidsDataOut;
     [ReadOnly] public NativeParallelMultiHashMap<int3, int> spatialHash;
     [ReadOnly] public WorldPartition Partition;
-    [ReadOnly]  public NativeArray<InstanceData> InstancesIn;
-    [WriteOnly]  public NativeArray<InstanceData> InstancesOut;
+    [ReadOnly] public NativeArray<InstanceData> InstancesIn;
+    [WriteOnly] public NativeArray<InstanceData> InstancesOut;
     public float CellSize;
     public float AvoidanceRange;
     public float AvoidanceStrength;
@@ -27,7 +27,7 @@ public struct FlockingJob : IJobParallelFor
 
     public float MaxSpeed;
     public float MinSpeed;
-   
+
 
     public void Execute(int i)
     {
@@ -45,7 +45,7 @@ public struct FlockingJob : IJobParallelFor
 
         var gridPos = Partition.ToPartition(position);
         //     int maxCheck = 1000;
-        int maxCheck = 1000;
+        int maxCheck = 10000;
         int checkedBoids = 0;
 
         var neighborCellsToCheck = math.clamp((int)math.round((AlignmentRange / 2) / CellSize), 1, int.MaxValue);
@@ -78,10 +78,18 @@ public struct FlockingJob : IJobParallelFor
                         }
 
                         // Alignment & Cohesion
-                        if (currentBoid.GroupID == otherBoid.GroupID && dist <= AlignmentRange)
+                        if (dist <= AlignmentRange)
                         {
-                            alignment += otherBoid.Velocity;
-                            cohesion += otherP;
+                            // if (currentBoid.GroupID == otherBoid.GroupID)
+                            {
+                                alignment += otherBoid.Velocity;
+                                cohesion += otherP;
+                            }
+                            // else
+                            {
+                            }
+
+
                             neighborCount++;
                         }
 
@@ -117,7 +125,7 @@ public struct FlockingJob : IJobParallelFor
             velocity += (cohesion - position) * CohesionStrength;
         }
 
-        
+
         float speed = math.length(velocity);
 
         if (speed > 0.001f)

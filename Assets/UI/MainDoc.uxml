@@ -1,0 +1,95 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="Container" data-source-type="DearBoids.Gameplay, Assembly-CSharp" style="flex-grow: 1; width: 100%; height: 100%; flex-direction: column; align-self: auto; align-content: auto; align-items: flex-end; justify-content: flex-end;">
+        <ui:Foldout text="Settings" focusable="false" name="Foldout" style="height: 100%; width: 35%; color: rgb(255, 255, 255); font-size: 50px; -unity-text-align: upper-left; background-color: rgba(0, 0, 0, 0);">
+            <ui:Label text="Label" name="Label" style="font-size: 17px;">
+                <Bindings>
+                    <ui:DataBinding property="text" data-source-path="fps" binding-mode="ToTarget"/>
+                </Bindings>
+            </ui:Label>
+            <ui:ScrollView horizontal-scroller-visibility="Hidden" name="ScrollView" vertical-scroller-visibility="Auto" style="min-height: 16%; min-width: 100%; height: 100%; width: 100%; align-items: stretch; align-content: stretch; align-self: center; justify-content: flex-start;">
+                <ui:Foldout text="General " name="General" style="color: rgb(0, 0, 0); background-color: rgba(203, 255, 255, 0.55); -unity-font-style: bold; font-size: 18px;">
+                    <ui:Label text="Bounds" name="Label"/>
+                    <ui:UnsignedIntegerField label="Width " value="100" name="BoundsX" data-source-path="">
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="xRange" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:UnsignedIntegerField>
+                    <ui:UnsignedIntegerField name="BoundsY" keyboard-type="NumberPad" data-source-path="" label="Height" value="100">
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="yRange" data-source-type="DearBoids.Gameplay, Assembly-CSharp" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:UnsignedIntegerField>
+                    <ui:UnsignedIntegerField name="Scale" keyboard-type="NumberPad" data-source-path="" label="Scale" value="100">
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="scale" data-source-type="DearBoids.Gameplay, Assembly-CSharp" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:UnsignedIntegerField>
+                    <ui:SliderInt label="Count" value="1000" high-value="100000" name="Count" style="padding-left: 0; padding-right: 10px; text-overflow: clip; -unity-text-align: upper-left;">
+                        <ui:Label text="1000000" name="CountText" parse-escape-sequences="false" enabled="true" style="min-width: 100px; -unity-text-align: upper-right; font-size: 19px;">
+                            <Bindings>
+                                <ui:DataBinding property="text" data-source-path="Count" binding-mode="ToTarget"/>
+                            </Bindings>
+                        </ui:Label>
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="Count" data-source-type="DearBoids.Gameplay, Assembly-CSharp" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:SliderInt>
+                </ui:Foldout>
+                <ui:Foldout text="Flocking " name="Flocking" style="color: rgb(0, 0, 0); background-color: rgba(203, 255, 255, 0.55); -unity-font-style: bold; font-size: 18px;">
+                    <ui:Label text="Range" style="font-size: 20px;"/>
+                    <ui:Slider label="avoidance" value="0.56" high-value="5" name="avoidance" style="-unity-font-style: normal;">
+                        <ui:Label text="Label" style="width: 100px;">
+                            <Bindings>
+                                <ui:DataBinding property="text" data-source-path="flockingSystem.avoidanceRange" binding-mode="ToTarget"/>
+                            </Bindings>
+                        </ui:Label>
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="flockingSystem.avoidanceRange" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:Slider>
+                    <ui:Slider label="alignment" value="0.56" high-value="5" name="alignment" style="-unity-font-style: normal;">
+                        <ui:Label text="Label" style="width: 100px;">
+                            <Bindings>
+                                <ui:DataBinding property="text" data-source-path="flockingSystem.alignmentRange" binding-mode="ToTarget"/>
+                            </Bindings>
+                        </ui:Label>
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="flockingSystem.alignmentRange" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:Slider>
+                    <ui:Label text="Strength " name="Strength" style="font-size: 20px;"/>
+                    <ui:Slider label="avoidance" value="0.56" high-value="5" name="avoidanceS" style="-unity-font-style: normal;">
+                        <ui:Label text="Label" style="width: 100px;">
+                            <Bindings>
+                                <ui:DataBinding property="text" data-source-path="flockingSystem.avoidanceRange" binding-mode="ToTarget"/>
+                            </Bindings>
+                        </ui:Label>
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="flockingSystem.avoidanceStrength" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:Slider>
+                    <ui:Slider label="alignment" value="0.56" high-value="5" name="alignmentS" style="-unity-font-style: normal;">
+                        <ui:Label text="Label" style="width: 100px;">
+                            <Bindings>
+                                <ui:DataBinding property="text" data-source-path="flockingSystem.alignmentStrength" binding-mode="ToTarget"/>
+                            </Bindings>
+                        </ui:Label>
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="flockingSystem.alignmentStrength" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:Slider>
+                    <ui:Slider label="cohesion" value="0.56" high-value="5" name="cohesionS" style="-unity-font-style: normal;">
+                        <ui:Label text="Label" style="width: 100px;">
+                            <Bindings>
+                                <ui:DataBinding property="text" data-source-path="flockingSystem.cohesionStrength" binding-mode="ToTarget"/>
+                            </Bindings>
+                        </ui:Label>
+                        <Bindings>
+                            <ui:DataBinding property="value" data-source-path="flockingSystem.cohesionStrength" binding-mode="TwoWay"/>
+                        </Bindings>
+                    </ui:Slider>
+                </ui:Foldout>
+            </ui:ScrollView>
+        </ui:Foldout>
+    </ui:VisualElement>
+</ui:UXML>

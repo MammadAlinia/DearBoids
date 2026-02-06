@@ -256,6 +256,61 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!1 &691446489
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 691446491}
+  - component: {fileID: 691446490}
+  m_Layer: 0
+  m_Name: UI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &691446490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 691446489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 6a0a5673bc17cc9409ce3be97772bc88, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: c5b910cf0472ac84aa1eb10192635d08, type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
+--- !u!4 &691446491
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 691446489}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 32.47758, y: -7.23358, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &816477242
 GameObject:
   m_ObjectHideFlags: 0
@@ -300,16 +355,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78e2c379e1ba4dcfa9972ae427f491e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DearBoids.Gameplay
-  flockingSetting: {fileID: 11400000, guid: 5c57b0810205a94409a8849e307fd1a4, type: 2}
+  flockingSetting: {fileID: 11400000, guid: 3989825dff5e02d438d910f63d16d634, type: 2}
   renderingSetting: {fileID: 11400000, guid: 886e915b37933254bb1483e3901263c7, type: 2}
-  count: 50000
-  cellSize: 1
-  scale: 250
+  count: 5000
+  cellSize: 3
+  scale: 100
   xRange: 0
   yRange: 0
   cameraS: {x: 0, y: 0, z: 0}
   _flockingSystem:
-    cellSize: 2
+    cellSize: 1
     avoidanceRange: 0
     boidMaxSpeed: 0
     boidMinSpeed: 0
@@ -317,6 +372,7 @@ MonoBehaviour:
     alignmentRange: 0
     alignmentStrength: 0
     avoidanceStrength: 0
+  document: {fileID: 691446490}
 --- !u!1 &1030153686
 GameObject:
   m_ObjectHideFlags: 0
@@ -606,3 +662,4 @@ SceneRoots:
   - {fileID: 1030153689}
   - {fileID: 1736072243}
   - {fileID: 2075952241}
+  - {fileID: 691446491}

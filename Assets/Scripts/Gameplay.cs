@@ -4,6 +4,7 @@ using SpatialPartition;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 namespace DearBoids
@@ -13,7 +14,9 @@ namespace DearBoids
         public FlockingSettingData flockingSetting;
         public RenderingSetting renderingSetting;
 
-        public int count = 1000;
+        public int prevCount = 1000;
+        public int Count = 1000;
+
         public float cellSize = 1f;
         public float scale = 25f;
 
@@ -25,15 +28,25 @@ namespace DearBoids
         public float yRange;
         public Vector3 cameraS;
 
-      [SerializeField]  private FlockingSystem _flockingSystem;
+        public FlockingSystem flockingSystem;
         private InstancedRenderingSystem _instancedRenderingSystem;
         private TurningSystem _turningSystem;
 
+        public UIDocument document;
+        public int fps;
+
         public void Start()
         {
-            boidsData = new NativeArray<Boid>(count, Allocator.Persistent);
-            boidInstances = new NativeArray<InstanceData>(count, Allocator.Persistent);
-            spatialHash = new NativeParallelMultiHashMap<int3, int>(count * 2, Allocator.Persistent);
+            document.rootVisualElement.dataSource = this;
+            InitSize();
+            InitSystems();
+        }
+
+        public void InitSystems()
+        {
+            boidsData = new NativeArray<Boid>(Count, Allocator.Persistent);
+            boidInstances = new NativeArray<InstanceData>(Count, Allocator.Persistent);
+            spatialHash = new NativeParallelMultiHashMap<int3, int>(Count * 2, Allocator.Persistent);
 
             var partition = new WorldPartition()
             {
@@ -43,11 +56,6 @@ namespace DearBoids
 
             _instancedRenderingSystem =
                 InstancedRenderingSystem.Default(mesh: renderingSetting.mesh, material: renderingSetting.material);
-
-            Camera.main.orthographicSize = scale;
-            cameraS = Camera.main.OrthographicBounds().size;
-            xRange = cameraS.x * 0.35f;
-            yRange = cameraS.y * 0.35f;
 
             for (int i = 0; i < boidsData.Length; i++)
             {
@@ -70,15 +78,34 @@ namespace DearBoids
             }
 
 
-            _flockingSystem = FlockingSystem.New(flockingSetting, partition);
+            flockingSystem = FlockingSystem.New(flockingSetting, partition);
             _turningSystem = TurningSystem.TurnCorner();
+        }
+
+        void InitSize()
+        {
+            Camera.main.orthographicSize = scale;
+            cameraS = Camera.main.OrthographicBounds().size;
+            xRange = cameraS.x * 0.50f;
+            yRange = cameraS.y * 0.50f;
         }
 
         void Update()
         {
+            fps = (int)(1f / Time.unscaledDeltaTime);
+
+            if (prevCount != Count)
+            {
+                Dispose();
+                InitSize();
+                InitSystems();
+                prevCount = Count;
+                return;
+            }
+
             _turningSystem.TurnUpdate(ref boidsData, ref boidInstances, new float2(-xRange, xRange),
                 new float2(-yRange, yRange), flockingSetting.turnFactor);
-            _flockingSystem.UpdateFlocking(ref boidsData, ref boidInstances, ref spatialHash);
+            flockingSystem.UpdateFlocking(ref boidsData, ref boidInstances, ref spatialHash);
 
             _instancedRenderingSystem.UpdateData(ref boidInstances);
             _instancedRenderingSystem.Draw();
@@ -86,7 +113,12 @@ namespace DearBoids
 
         void OnDisable()
         {
-            _flockingSystem?.Dispose();
+            Dispose();
+        }
+
+        void Dispose()
+        {
+            flockingSystem?.Dispose();
             _instancedRenderingSystem?.Dispose();
             if (boidsData.IsCreated) boidsData.Dispose();
             if (boidInstances.IsCreated) boidInstances.Dispose();
