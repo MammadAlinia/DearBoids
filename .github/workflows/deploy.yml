@@ -1,0 +1,78 @@
+name: Build & Deploy WebGL
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  actions: write   # save Library cache
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Library folder
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-WebGL-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-WebGL-
+
+      # ── BUILD STEP — swap this block for the Unity CLI once its exact
+      #    syntax is confirmed; the CLI still needs a license set via env. ──
+      - name: Build WebGL
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+        with:
+          projectPath: .            # repo root = Unity project
+          unityVersion: auto        # reads ProjectSettings/ProjectVersion.txt
+          targetPlatform: WebGL
+          buildsPath: build
+          buildName: Web
+
+      # ── Normalize output to the layout our styled index.html expects ──
+      - name: Assemble Pages artifact
+        run: |
+          src=build/WebGL
+          mkdir -p publish/Build
+          cp "$src"/*.loader.js              publish/Build/Web.loader.js
+          cp "$src"/*.data.unityweb          publish/Build/Web.data.unityweb
+          cp "$src"/*.framework.js.unityweb  publish/Build/Web.framework.js.unityweb
+          cp "$src"/*.wasm.unityweb          publish/Build/Web.wasm.unityweb
+          if compgen -G "$src/*.worker.js.unityweb" > /dev/null; then
+            cp "$src"/*.worker.js.unityweb publish/Build/Web.worker.js.unityweb
+          else
+            echo "WARNING: no worker file found — is Multithreading still on?"
+          fi
+          cp -r "$src"/TemplateData publish/TemplateData
+          cp web/index.html publish/index.html
+          cp web/coi-serviceworker.js publish/
+          touch publish/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: publish
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
