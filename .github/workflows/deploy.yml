@@ -44,25 +44,40 @@ jobs:
           buildsPath: build
           buildName: Web
 
-      # ── Normalize output to the layout our styled index.html expects ──
       - name: Assemble Pages artifact
         run: |
-          src=build/WebGL
-          mkdir -p publish/Build
-          cp "$src"/*.loader.js              publish/Build/Web.loader.js
-          cp "$src"/*.data.unityweb          publish/Build/Web.data.unityweb
-          cp "$src"/*.framework.js.unityweb  publish/Build/Web.framework.js.unityweb
-          cp "$src"/*.wasm.unityweb          publish/Build/Web.wasm.unityweb
-          if compgen -G "$src/*.worker.js.unityweb" > /dev/null; then
-            cp "$src"/*.worker.js.unityweb publish/Build/Web.worker.js.unityweb
-          else
-            echo "WARNING: no worker file found — is Multithreading still on?"
+          # GameCI's output layout varies — find the Unity output by its
+          # loader file instead of hardcoding a path.
+          loader=$(find build -name '*.loader.js' | head -n 1)
+          if [ -z "$loader" ]; then
+            echo "No *.loader.js found. Actual build output:"
+            find build -type f | head -50
+            exit 1
           fi
-          cp -r "$src"/TemplateData publish/TemplateData
+          build_dir=$(dirname "$loader")   # .../<output>/Build
+          tpl_dir=$(find build -type d -name TemplateData | head -n 1)
+
+          mkdir -p publish/Build publish/TemplateData
+          cp "$loader"                            publish/Build/Web.loader.js
+          cp "$build_dir"/*.data.unityweb         publish/Build/Web.data.unityweb
+          cp "$build_dir"/*.framework.js.unityweb publish/Build/Web.framework.js.unityweb
+          cp "$build_dir"/*.wasm.unityweb         publish/Build/Web.wasm.unityweb
+
+          if compgen -G "$build_dir/*.worker.js.unityweb" > /dev/null; then
+            cp "$build_dir"/*.worker.js.unityweb publish/Build/Web.worker.js.unityweb
+          else
+            echo "::warning::No worker file in build output — Multithreading may be off in Player Settings"
+          fi
+
+          # StreamingAssets only exists if the project has one
+          sa_dir=$(find build -type d -name StreamingAssets | head -n 1)
+          [ -n "$sa_dir" ] && cp -r "$sa_dir" publish/StreamingAssets
+
+          cp "$tpl_dir"/. publish/TemplateData/
           cp web/index.html publish/index.html
           cp web/coi-serviceworker.js publish/
           touch publish/.nojekyll
-
+          
       - uses: actions/upload-pages-artifact@v3
         with:
           path: publish
