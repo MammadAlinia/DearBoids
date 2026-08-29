@@ -43,18 +43,23 @@ jobs:
           targetPlatform: WebGL
           buildsPath: build
           buildName: Web
+      # Upload raw output so you can inspect it: run page → Summary → Artifacts
+      - name: Upload raw build (for inspection)
+        uses: actions/upload-artifact@v4
+        with:
+          name: webgl-build-raw
+          path: build
+          retention-days: 7
 
       - name: Assemble Pages artifact
         run: |
-          # GameCI's output layout varies — find the Unity output by its
-          # loader file instead of hardcoding a path.
           loader=$(find build -name '*.loader.js' | head -n 1)
           if [ -z "$loader" ]; then
             echo "No *.loader.js found. Actual build output:"
             find build -type f | head -50
             exit 1
           fi
-          build_dir=$(dirname "$loader")   # .../<output>/Build
+          build_dir=$(dirname "$loader")
           tpl_dir=$(find build -type d -name TemplateData | head -n 1)
 
           mkdir -p publish/Build publish/TemplateData
@@ -62,21 +67,23 @@ jobs:
           cp "$build_dir"/*.data.unityweb         publish/Build/Web.data.unityweb
           cp "$build_dir"/*.framework.js.unityweb publish/Build/Web.framework.js.unityweb
           cp "$build_dir"/*.wasm.unityweb         publish/Build/Web.wasm.unityweb
-
-          if compgen -G "$build_dir/*.worker.js.unityweb" > /dev/null; then
-            cp "$build_dir"/*.worker.js.unityweb publish/Build/Web.worker.js.unityweb
-          else
-            echo "::warning::No worker file in build output — Multithreading may be off in Player Settings"
-          fi
+          cp -r "$tpl_dir"/.                      publish/TemplateData/
 
           # StreamingAssets only exists if the project has one
           sa_dir=$(find build -type d -name StreamingAssets | head -n 1)
           [ -n "$sa_dir" ] && cp -r "$sa_dir" publish/StreamingAssets
 
-          cp "$tpl_dir"/. publish/TemplateData/
+          # Fail loudly if anything we're about to publish is missing
+          for f in Web.loader.js Web.data.unityweb Web.framework.js.unityweb Web.wasm.unityweb; do
+            [ -f "publish/Build/$f" ] || { echo "Missing publish/Build/$f"; exit 1; }
+          done
+
           cp web/index.html publish/index.html
           cp web/coi-serviceworker.js publish/
           touch publish/.nojekyll
+
+          echo "--- publish ---"
+          find publish -type f | sort
           
       - uses: actions/upload-pages-artifact@v3
         with:
