@@ -1,0 +1,280 @@
+﻿<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0d10">
+    <title>DearBoids · MohammadAlinia</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <script src="coi-serviceworker.js"></script>
+    <script src="TemplateData/profiler.js"></script>
+    <style>
+        :root {
+            --bg: #0b0d10;
+            --text: #e8edf2;
+            --muted: #79828e;
+            --border: rgba(255, 255, 255, 0.07);
+            --accent: #e2a54f;
+            --stage-w: min(960px, 92vw, calc((100vh - 130px) * 1.6));
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        #bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+        #unity-container {
+            position: relative;
+            z-index: 1;
+            width: var(--stage-w);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .stage {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 8 / 5;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #000;
+            border: 1px solid var(--border);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 2px 10px rgba(0, 0, 0, 0.4);
+        }
+        #unity-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
+
+        #loading-overlay {
+            position: absolute; inset: 0; z-index: 5;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 18px;
+            background: radial-gradient(120% 120% at 50% 35%, #12161d 0%, #0b0d10 75%);
+            transition: opacity 0.6s ease, visibility 0.6s;
+        }
+        #loading-overlay.done { opacity: 0; visibility: hidden; pointer-events: none; }
+        .overline {
+            font-size: 10px; letter-spacing: 0.4em; text-indent: 0.4em;
+            text-transform: uppercase; color: var(--muted);
+        }
+        #loading-overlay h1 { font-size: 30px; font-weight: 600; letter-spacing: -0.02em; }
+        .bar {
+            width: 200px; height: 2px; border-radius: 2px;
+            background: rgba(255, 255, 255, 0.08); overflow: hidden;
+        }
+        #progress-fill {
+            width: 0%; height: 100%;
+            background: var(--accent); border-radius: 2px;
+            box-shadow: 0 0 12px rgba(226, 165, 79, 0.7);
+            transition: width 0.2s ease-out;
+        }
+        #progress-pct {
+            font-size: 11px; letter-spacing: 0.2em; text-indent: 0.2em;
+            color: var(--muted); font-variant-numeric: tabular-nums;
+        }
+
+        #unity-warning {
+            position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+            z-index: 10; max-width: 85%;
+        }
+        #unity-warning div { padding: 8px 16px; border-radius: 8px; font-size: 13px; text-align: center; }
+        .banner-error   { background: rgba(214, 69, 69, 0.92); color: #fff; }
+        .banner-warning { background: rgba(226, 165, 79, 0.92); color: #201404; }
+
+        #unity-footer { display: flex; align-items: center; justify-content: space-between; }
+        .meta { font-size: 12.5px; color: var(--muted); }
+        .meta b { color: var(--text); font-weight: 500; }
+        .meta span { margin-left: 10px; }
+        .tools { display: flex; align-items: center; gap: 8px; }
+        .tools button {
+            width: 30px; height: 30px; padding: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--muted); cursor: pointer;
+            transition: color 0.15s, background 0.15s, border-color 0.15s;
+        }
+        .tools button:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.14);
+        }
+        .tools button img { width: 15px; height: 15px; opacity: 0.7; }
+
+        #ended {
+            position: fixed; inset: 0; z-index: 2;
+            display: none; align-items: center; justify-content: center;
+            color: var(--muted); font-size: 14px;
+        }
+        #ended.show { display: flex; }
+
+        .unity-mobile { width: 100vw !important; gap: 0; }
+        .unity-mobile .stage { width: 100vw; height: 100vh; aspect-ratio: auto; border-radius: 0; border: none; box-shadow: none; }
+        .unity-mobile #unity-footer { display: none; }
+    </style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<div id="unity-container" class="unity-desktop">
+    <div class="stage">
+        <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+        <div id="unity-warning"></div>
+        <div id="loading-overlay">
+            <div class="overline">MohammadAlinia</div>
+            <h1>DearBoids</h1>
+            <div class="bar"><div id="progress-fill"></div></div>
+            <div id="progress-pct">0%</div>
+        </div>
+    </div>
+
+    <div id="unity-footer">
+        <div class="meta"><b id="meta-title"></b><span id="meta-version"></span><span id="meta-company"></span></div>
+        <div class="tools" id="unity-tools">
+            <button id="unity-fullscreen-button" title="Fullscreen" aria-label="Fullscreen">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="ended">Session unloaded — refresh to play again.</div>
+
+<script>
+    var canvas = document.querySelector("#unity-canvas");
+
+    function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+            warningBanner.style.display = warningBanner.children.length ? "block" : "none";
+        }
+        var div = document.createElement("div");
+        div.innerHTML = msg;
+        div.className = type === "error" ? "banner-error" : "banner-warning";
+        warningBanner.appendChild(div);
+        if (type !== "error") {
+            setTimeout(function () {
+                warningBanner.removeChild(div);
+                updateBannerVisibility();
+            }, 5000);
+        }
+        updateBannerVisibility();
+    }
+
+    var buildUrl = "Build";
+    var config = {
+        dataUrl: buildUrl + "/Web.data.unityweb",
+        frameworkUrl: buildUrl + "/Web.framework.js.unityweb",
+        codeUrl: buildUrl + "/Web.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "MohammadAlinia",
+        productName: "DearBoids",
+        productVersion: "1.0.0",
+        showBanner: unityShowBanner,
+    };
+
+    // Footer follows Player Settings automatically
+    document.querySelector("#meta-title").textContent = config.productName;
+    document.querySelector("#meta-version").textContent = "v" + config.productVersion;
+    document.querySelector("#meta-company").textContent = config.companyName;
+
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        document.querySelector('meta[name="viewport"]').content =
+            "width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes";
+        document.querySelector("#unity-container").classList.add("unity-mobile");
+        // config.devicePixelRatio = 1; // uncomment for better mobile performance
+    }
+
+    var script = document.createElement("script");
+    script.src = buildUrl + "/Web.loader.js";
+    script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+            document.querySelector("#progress-fill").style.width = 100 * progress + "%";
+            document.querySelector("#progress-pct").textContent = Math.round(100 * progress) + "%";
+        }).then((unityInstance) => {
+            document.querySelector("#loading-overlay").classList.add("done");
+
+            document.querySelector("#unity-fullscreen-button").onclick = () =>
+                unityInstance.SetFullscreen(1);
+
+            var tools = document.querySelector("#unity-tools");
+
+            if (window.unityProfiler) {
+                tools.appendChild(unityProfiler.createButton(unityInstance));
+            }
+
+            var quit = document.createElement("button");
+            quit.title = "Unload";
+            quit.innerHTML =
+                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></svg>';
+            tools.appendChild(quit);
+
+            quit.onclick = () => {
+                unityInstance.Quit().then(() => {
+                    if (window.unityProfiler) unityProfiler.shutDown();
+                    document.querySelector("#unity-container").remove();
+                    canvas = null;
+                    script.remove();
+                    script = null;
+                    document.querySelector("#ended").classList.add("show");
+                });
+            };
+        }).catch((message) => {
+            alert(message);
+        });
+    };
+    document.body.appendChild(script);
+
+    // Subtle drifting particles behind the stage
+    (function () {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        var bg = document.getElementById("bg");
+        var ctx = bg.getContext("2d");
+        var dots = [];
+
+        function resize() { bg.width = innerWidth; bg.height = innerHeight; }
+        addEventListener("resize", resize);
+        resize();
+
+        for (var i = 0; i < 40; i++) {
+            dots.push({
+                x: Math.random() * bg.width,
+                y: Math.random() * bg.height,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3,
+                r: 0.8 + Math.random() * 1.4,
+                a: 0.05 + Math.random() * 0.15,
+                amber: Math.random() < 0.15
+            });
+        }
+
+        (function tick() {
+            ctx.clearRect(0, 0, bg.width, bg.height);
+            for (var i = 0; i < dots.length; i++) {
+                var d = dots[i];
+                d.x += d.vx; d.y += d.vy;
+                if (d.x < -10) d.x = bg.width + 10; else if (d.x > bg.width + 10) d.x = -10;
+                if (d.y < -10) d.y = bg.height + 10; else if (d.y > bg.height + 10) d.y = -10;
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, d.r, 0, 6.283);
+                ctx.fillStyle = d.amber
+                    ? "rgba(226,165,79," + d.a + ")"
+                    : "rgba(255,255,255," + d.a + ")";
+                ctx.fill();
+            }
+            requestAnimationFrame(tick);
+        })();
+    })();
+</script>
+</body>
+</html>
