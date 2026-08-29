@@ -45,7 +45,7 @@ public struct FlockingJob : IJobParallelFor
 
         var gridPos = Partition.ToPartition(position);
         //     int maxCheck = 1000;
-        int maxCheck = 10000;
+        int maxCheck = int.MaxValue;
         int checkedBoids = 0;
 
         var neighborCellsToCheck = math.clamp((int)math.round((AlignmentRange / 2) / CellSize), 1, int.MaxValue);
@@ -139,7 +139,7 @@ public struct FlockingJob : IJobParallelFor
 
         position += velocity * DeltaTime;
         currentInstance.Matrix = float4x4.TRS(position,
-            quaternion.LookRotation(new float3(0, 0, 1), direction), new float3(.5f, 1, 1));
+            quaternion.LookRotation(new float3(0, 0, 1), direction), new float3(1, 1, 1));
         currentInstance.MatrixInverse = math.inverse(currentInstance.Matrix);
         currentBoid.Velocity = velocity;
 

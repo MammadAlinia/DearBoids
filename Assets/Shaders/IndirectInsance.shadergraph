@@ -19,11 +19,7 @@
             "m_Id": "be38f00eb4c0454485b03617cf06c7a9"
         }
     ],
-    "m_Keywords": [
-        {
-            "m_Id": "d160e0fd149b45089181194e7a95994c"
-        }
-    ],
+    "m_Keywords": [],
     "m_Dropdowns": [],
     "m_CategoryData": [
         {
@@ -1817,8 +1813,8 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 1560.0001220703125,
-            "y": 622.0,
+            "x": 1555.0,
+            "y": 638.0,
             "width": 120.0,
             "height": 149.0
         }
@@ -1858,9 +1854,6 @@
     "m_ObjectId": "6d1c5be2b92a40fe9a557cf0596eab21",
     "m_Name": "",
     "m_ChildObjectList": [
-        {
-            "m_Id": "d160e0fd149b45089181194e7a95994c"
-        },
         {
             "m_Id": "92ac140e08cc466391abe9c9ba0c1c62"
         },
@@ -2353,8 +2346,8 @@
     "m_ObjectId": "97ab20ce8faf4da6b40a68014dfc55bf",
     "m_Title": "Border",
     "m_Position": {
-        "x": -952.0000610351563,
-        "y": 455.0000915527344
+        "x": -952.0,
+        "y": 455.0000305175781
     }
 }
 
@@ -3140,34 +3133,6 @@
 }
 
 {
-    "m_SGVersion": 1,
-    "m_Type": "UnityEditor.ShaderGraph.ShaderKeyword",
-    "m_ObjectId": "d160e0fd149b45089181194e7a95994c",
-    "m_Guid": {
-        "m_GuidSerialized": "944f5561-2be6-419d-b67e-da484d626e4e"
-    },
-    "promotedFromAssetID": "",
-    "promotedFromCategoryName": "",
-    "promotedOrdering": -1,
-    "m_Name": "PROCEDURAL_INSTANCING_ON",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "PROCEDURAL_INSTANCING_ON",
-    "m_DefaultReferenceName": "_PROCEDURAL_INSTANCING_ON",
-    "m_OverrideReferenceName": "PROCEDURAL_INSTANCING_ON",
-    "m_GeneratePropertyBlock": true,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_DismissedVersion": 0,
-    "m_KeywordType": 0,
-    "m_KeywordDefinition": 1,
-    "m_KeywordScope": 1,
-    "m_KeywordStages": 63,
-    "m_Entries": [],
-    "m_Value": 1,
-    "m_IsEditable": true
-}
-
-{
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.DynamicValueMaterialSlot",
     "m_ObjectId": "d8cbed9d6bb248b2b8ed6fb5c37914c3",
@@ -3393,8 +3358,8 @@
     "m_ObjectId": "f330fa82621444b2964487a89be886c2",
     "m_Title": "Instancing",
     "m_Position": {
-        "x": -1520.0001220703125,
-        "y": 133.00001525878907
+        "x": -1520.0,
+        "y": 133.00003051757813
     }
 }
 

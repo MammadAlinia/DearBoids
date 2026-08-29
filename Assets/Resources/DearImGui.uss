@@ -1,0 +1,241 @@
+﻿/* DearImGui.uss — v3: menu bar, fixed slider text, window below menu bar */
+
+/* ---------------- main menu bar ---------------- */
+
+.imgui-menubar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 22px;
+    flex-direction: row;
+    align-items: stretch;
+
+    background-color: rgba(15, 15, 15, 0.94);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(110, 110, 128, 0.50);
+
+    font-size: 13px;
+    color: rgba(255, 255, 255, 1);
+}
+
+.imgui-menubar__item {
+    position: relative;          /* anchors the dropdown */
+    padding: 0 12px;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0);
+}
+.imgui-menubar__item:hover { background-color: rgba(66, 150, 250, 0.40); }
+
+.imgui-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 170px;
+    padding: 2px;
+
+    background-color: rgba(15, 15, 15, 0.98);
+    border-width: 1px;
+    border-color: rgba(110, 110, 128, 0.60);
+    border-radius: 2px;
+}
+
+.imgui-menu__item {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 3px 10px;
+    border-radius: 2px;
+}
+.imgui-menu__item:hover { background-color: rgba(66, 150, 250, 0.60); }
+.imgui-menu__check     { min-width: 14px; color: rgba(255, 255, 255, 1); }
+
+/* ---------------- window ---------------- */
+
+.imgui {
+    position: absolute;
+    top: 30px;                    /* below the menu bar */
+    left: 16px;
+    width: 320px;
+    max-height: 85%;
+
+    background-color: rgba(15, 15, 15, 0.94);
+    border-width: 1px;
+    border-color: rgba(110, 110, 128, 0.50);
+    border-radius: 3px;
+
+    color: rgba(255, 255, 255, 1);
+    font-size: 13px;
+}
+
+.imgui__titlebar {
+    flex-direction: row;
+    align-items: center;
+    padding: 3px 4px 3px 8px;
+    background-color: rgb(41, 74, 122);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0, 0, 0, 0.45);
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+}
+.imgui__title { flex-grow: 1; -unity-font-style: bold; white-space: nowrap; }
+
+.imgui__titlebtn {
+    min-width: 20px;
+    height: 18px;
+    margin-left: 4px;
+    padding: 0;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 1);
+    background-color: rgba(255, 255, 255, 0.10);
+    border-width: 0;
+    border-radius: 2px;
+}
+.imgui__titlebtn:hover  { background-color: rgba(66, 150, 250, 0.60); }
+.imgui__titlebtn:active { background-color: rgba(66, 150, 250, 1.00); }
+
+/* ---------------- scroll view ---------------- */
+
+.imgui__scroll { flex-grow: 1; background-color: rgba(0, 0, 0, 0); }
+.imgui__scroll .unity-scroll-view__content-viewport { background-color: rgba(0, 0, 0, 0); }
+
+.imgui__scroll #unity-vertical-scroller { width: 10px; }
+.imgui__scroll #unity-dragger {
+    background-color: rgba(110, 110, 128, 0.55);
+    border-width: 0;
+    border-radius: 3px;
+}
+.imgui__scroll #unity-tracker {
+    background-color: rgba(0, 0, 0, 0.25);
+    border-width: 0;
+    border-radius: 3px;
+}
+
+.imgui__content { padding: 6px 8px 8px 8px; }
+
+.imgui-separator {
+    height: 1px;
+    margin: 6px 0;
+    background-color: rgba(110, 110, 128, 0.50);
+}
+
+/* ---------------- collapsing headers ---------------- */
+
+.imgui-header {
+    flex-direction: row;
+    align-items: center;
+    margin: 4px 0 2px 0;
+    padding: 3px 6px;
+    border-radius: 2px;
+    background-color: rgba(56, 62, 78, 0.80);
+}
+.imgui-header:hover { background-color: rgba(66, 150, 250, 0.45); }
+
+.imgui-header__arrow { min-width: 14px; font-size: 11px; color: rgba(255, 255, 255, 0.85); }
+.imgui-header__title { -unity-font-style: bold; }
+.imgui-header__body  { margin: 2px 0 4px 0; }
+
+/* ---------------- sliders ----------------
+   Labels are edge-anchored with middle text alignment: no drift, no clipping. */
+
+.imgui-slider {
+    position: relative;
+    height: 21px;                  /* bump to 24 if your font still clips */
+    margin: 2px 0;
+    border-radius: 2px;
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.45);
+    background-color: rgba(41, 74, 122, 0.54);
+    overflow: hidden;
+}
+.imgui-slider:hover { border-color: rgba(110, 110, 128, 0.60); }
+
+.imgui-slider__fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    background-color: rgba(66, 150, 250, 0.67);
+    border-right-width: 1px;
+    border-right-color: rgba(120, 175, 255, 0.90);
+}
+.imgui-slider:hover  .imgui-slider__fill { background-color: rgba(66, 150, 250, 0.85); }
+.imgui-slider:active .imgui-slider__fill { background-color: rgba(66, 150, 250, 1.00); }
+
+.imgui-slider__name {
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 1);
+}
+.imgui-slider__val {
+    position: absolute;
+    right: 8px;
+    top: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-right;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 1);
+}
+
+/* ---------------- stats ---------------- */
+
+.imgui-stat {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 1px 6px;
+}
+.imgui-stat__label { color: rgba(128, 128, 128, 1); }
+.imgui-stat__value { color: rgba(255, 255, 255, 1); -unity-text-align: middle-right; }
+
+/* ---------------- buttons ---------------- */
+
+.imgui-button {
+    margin: 8px 0 0 0;
+    padding: 4px 10px;
+    color: rgba(255, 255, 255, 1);
+    background-color: rgba(66, 150, 250, 0.40);
+    border-width: 1px;
+    border-radius: 2px;
+}
+.imgui-button:hover  { background-color: rgba(66, 150, 250, 1.00); }
+.imgui-button:active { background-color: rgba(15, 135, 250, 1.00); }
+/* ---------------- color edit / toggle ---------------- */
+
+.imgui-color {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 6px;
+}
+.imgui-color__label  { color: rgba(128, 128, 128, 1); }
+.imgui-color__swatch {
+    width: 64px;
+    height: 12px;
+    border-width: 1px;
+    border-color: rgba(110, 110, 128, 0.60);
+    border-radius: 2px;
+}
+
+.imgui-toggle { flex-direction: row; align-items: center; padding: 2px 6px; }
+.imgui-toggle__box {
+    width: 15px;
+    height: 15px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(41, 74, 122, 0.54);
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.45);
+    border-radius: 2px;
+}
+.imgui-toggle__box:hover { border-color: rgba(110, 110, 128, 0.60); }
+.imgui-toggle__box--on   { background-color: rgba(66, 150, 250, 0.85); }
+.imgui-toggle__mark  { font-size: 11px; color: rgba(255, 255, 255, 1); margin: 0; padding: 0; }
+.imgui-toggle__text  { margin-left: 6px; color: rgba(255, 255, 255, 1); }

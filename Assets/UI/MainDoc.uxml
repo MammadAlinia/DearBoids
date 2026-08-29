@@ -1,12 +1,8 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <ui:VisualElement name="Container" data-source-type="DearBoids.Gameplay, Assembly-CSharp" style="flex-grow: 1; width: 100%; height: 100%; flex-direction: column; align-self: auto; align-content: auto; align-items: flex-end; justify-content: flex-end;">
-        <ui:Foldout text="Settings" focusable="false" name="Foldout" style="height: 100%; width: 35%; color: rgb(255, 255, 255); font-size: 50px; -unity-text-align: upper-left; background-color: rgba(0, 0, 0, 0);">
-            <ui:Label text="Label" name="Label" style="font-size: 17px;">
-                <Bindings>
-                    <ui:DataBinding property="text" data-source-path="fps" binding-mode="ToTarget"/>
-                </Bindings>
-            </ui:Label>
+    <ui:VisualElement name="Container" data-source-type="DearBoids.Gameplay, Assembly-CSharp" style="flex-grow: 1; width: 100%; height: 100%; flex-direction: column; align-self: auto; align-content: auto; align-items: flex-end; justify-content: flex-end; -unity-font-style: normal; -unity-text-align: upper-left;">
+        <ui:Foldout text="Settings" focusable="false" name="Foldout" style="height: 100%; width: 35%; color: rgb(255, 255, 255); font-size: 24px; -unity-text-align: upper-left; background-color: rgba(0, 0, 0, 0); white-space: normal; text-overflow: clip;">
             <ui:ScrollView horizontal-scroller-visibility="Hidden" name="ScrollView" vertical-scroller-visibility="Auto" style="min-height: 16%; min-width: 100%; height: 100%; width: 100%; align-items: stretch; align-content: stretch; align-self: center; justify-content: flex-start;">
+                <ui:Label text="Label" data-source-path="fps"/>
                 <ui:Foldout text="General " name="General" style="color: rgb(0, 0, 0); background-color: rgba(203, 255, 255, 0.55); -unity-font-style: bold; font-size: 18px;">
                     <ui:Label text="Bounds" name="Label"/>
                     <ui:UnsignedIntegerField label="Width " value="100" name="BoundsX" data-source-path="">

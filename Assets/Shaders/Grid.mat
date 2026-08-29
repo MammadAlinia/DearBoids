@@ -45,7 +45,7 @@ Material:
     m_Ints: []
     m_Floats:
     - PROCEDURAL_INSTANCING: 1
-    - _Border: 1
+    - _Border: 0
     - _BorderRadius: 0.1
     - _BorderRoundness: 0.1
     - _PROCEDURAL_INSTANCING: 1
