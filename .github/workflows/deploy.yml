@@ -2,7 +2,7 @@ name: Build & Deploy
 
 on:
   push:
-    tags: ['v*']        # the only trigger: pushing v1.2.3 ships everything
+    tags: ['v*']        # pushing v1.2.3 builds everything, deploys Pages, creates a Release
 
 permissions:
   contents: write       # create releases
@@ -88,6 +88,7 @@ jobs:
           name: release-web
           path: dist/DearBoids-Web.zip
           retention-days: 7
+
   buildWindows:
     runs-on: windows-latest
     steps:
@@ -113,7 +114,8 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force dist | Out-Null
-          Compress-Archive -Path build/StandaloneWindows64 -DestinationPath dist/DearBoids-Windows.zip
+          Rename-Item build/StandaloneWindows64 -NewName DearBoids
+          Compress-Archive -Path build/DearBoids -DestinationPath dist/DearBoids-Windows.zip
 
       - uses: actions/upload-artifact@v4
         with:
@@ -142,15 +144,15 @@ jobs:
           path: dist
 
       - name: Attach builds to GitHub Release
-          env:
-            GH_TOKEN: ${{ github.token }}
-            TAG: ${{ github.ref_name }}
-            REPO: ${{ github.repository }}
-          run: |
-            for f in dist/*.zip; do mv "$f" "${f%.zip}-$TAG.zip"; done
-            ls -la dist
-            if gh release view "$TAG" -R "$REPO" >/dev/null 2>&1; then
-              gh release upload "$TAG" dist/*.zip -R "$REPO" --clobber
-            else
-              gh release create "$TAG" dist/*.zip -R "$REPO" --title "DearBoids $TAG" --generate-notes
-            fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          for f in dist/*.zip; do mv "$f" "${f%.zip}-$TAG.zip"; done
+          ls -la dist
+          if gh release view "$TAG" -R "$REPO" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/*.zip -R "$REPO" --clobber
+          else
+            gh release create "$TAG" dist/*.zip -R "$REPO" --title "DearBoids $TAG" --generate-notes
+          fi
