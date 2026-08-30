@@ -57,6 +57,7 @@ namespace DearBoids
 
         public void Start()
         {
+            Time.timeScale = .7f;
             SetSimBounds(simWidth, simHeight);
             InitCamera();
             InitSystems();
