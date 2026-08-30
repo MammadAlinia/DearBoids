@@ -88,9 +88,8 @@ jobs:
           name: release-web
           path: dist/DearBoids-Web.zip
           retention-days: 7
-
   buildWindows:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -111,11 +110,10 @@ jobs:
           buildName: DearBoids
 
       - name: Zip Windows build
+        shell: pwsh
         run: |
-          mkdir -p dist
-          cp -r build/StandaloneWindows64 DearBoids
-          zip -qr dist/DearBoids-Windows.zip DearBoids
-          rm -rf DearBoids
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Compress-Archive -Path build/StandaloneWindows64 -DestinationPath dist/DearBoids-Windows.zip
 
       - uses: actions/upload-artifact@v4
         with:
