@@ -142,14 +142,15 @@ jobs:
           path: dist
 
       - name: Attach builds to GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
-        run: |
-          for f in dist/*.zip; do mv "$f" "${f%.zip}-$TAG.zip"; done
-          ls -la dist
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" dist/*.zip --clobber
-          else
-            gh release create "$TAG" dist/*.zip --title "DearBoids $TAG" --generate-notes
-          fi
+          env:
+            GH_TOKEN: ${{ github.token }}
+            TAG: ${{ github.ref_name }}
+            REPO: ${{ github.repository }}
+          run: |
+            for f in dist/*.zip; do mv "$f" "${f%.zip}-$TAG.zip"; done
+            ls -la dist
+            if gh release view "$TAG" -R "$REPO" >/dev/null 2>&1; then
+              gh release upload "$TAG" dist/*.zip -R "$REPO" --clobber
+            else
+              gh release create "$TAG" dist/*.zip -R "$REPO" --title "DearBoids $TAG" --generate-notes
+            fi
