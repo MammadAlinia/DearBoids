@@ -1,55 +1,45 @@
-name: Build & Deploy WebGL
+name: Build & Deploy
 
 on:
   push:
-    branches: [master]
-  workflow_dispatch:
+    tags: ['v*']        # the only trigger: pushing v1.2.3 ships everything
 
 permissions:
-  actions: write   # save Library cache
-  contents: read
+  contents: write       # create releases
   pages: write
   id-token: write
 
 concurrency:
-  group: pages
+  group: ${{ github.workflow }}   # one run at a time; newer tag cancels an older in-flight run
   cancel-in-progress: true
 
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+  UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+
 jobs:
-  build:
+  buildWebGL:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache Library folder
+      - name: Cache Library
         uses: actions/cache@v4
         with:
           path: Library
           key: Library-WebGL-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: Library-WebGL-
 
-      # ── BUILD STEP — swap this block for the Unity CLI once its exact
-      #    syntax is confirmed; the CLI still needs a license set via env. ──
       - name: Build WebGL
         uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
         with:
-          projectPath: .            # repo root = Unity project
-          unityVersion: auto        # reads ProjectSettings/ProjectVersion.txt
+          projectPath: .
+          unityVersion: auto
           targetPlatform: WebGL
           buildsPath: build
           buildName: Web
-      # Upload raw output so you can inspect it: run page → Summary → Artifacts
-      - name: Upload raw build (for inspection)
-        uses: actions/upload-artifact@v4
-        with:
-          name: webgl-build-raw
-          path: build
-          retention-days: 7
 
       - name: Assemble Pages artifact
         run: |
@@ -69,11 +59,9 @@ jobs:
           cp "$build_dir"/*.wasm.unityweb         publish/Build/Web.wasm.unityweb
           cp -r "$tpl_dir"/.                      publish/TemplateData/
 
-          # StreamingAssets only exists if the project has one
           sa_dir=$(find build -type d -name StreamingAssets | head -n 1)
           [ -n "$sa_dir" ] && cp -r "$sa_dir" publish/StreamingAssets
 
-          # Fail loudly if anything we're about to publish is missing
           for f in Web.loader.js Web.data.unityweb Web.framework.js.unityweb Web.wasm.unityweb; do
             [ -f "publish/Build/$f" ] || { echo "Missing publish/Build/$f"; exit 1; }
           done
@@ -81,16 +69,62 @@ jobs:
           cp web/index.html publish/index.html
           cp web/coi-serviceworker.js publish/
           touch publish/.nojekyll
+          printf 'DearBoids - WebGL build\n\nServe this folder with any static file server, e.g.:\n  python -m http.server 8000\nthen open http://localhost:8000\n(coi-serviceworker.js enables multithreading - keep it next to index.html)\n' > publish/HOW-TO-RUN.txt
 
           echo "--- publish ---"
           find publish -type f | sort
-          
+
+      - name: Zip web build (for release)
+        run: |
+          mkdir -p dist
+          (cd publish && zip -qr ../dist/DearBoids-Web.zip .)
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: publish
 
-  deploy:
-    needs: build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-web
+          path: dist/DearBoids-Web.zip
+          retention-days: 7
+
+  buildWindows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-StandaloneWindows64-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-StandaloneWindows64-
+
+      - name: Build Windows
+        uses: game-ci/unity-builder@v4
+        with:
+          projectPath: .
+          unityVersion: auto
+          targetPlatform: StandaloneWindows64
+          buildsPath: build
+          buildName: DearBoids
+
+      - name: Zip Windows build
+        run: |
+          mkdir -p dist
+          cp -r build/StandaloneWindows64 DearBoids
+          zip -qr dist/DearBoids-Windows.zip DearBoids
+          rm -rf DearBoids
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-windows
+          path: dist/DearBoids-Windows.zip
+          retention-days: 7
+
+  deployPages:
+    needs: buildWebGL
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -98,3 +132,26 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  release:
+    needs: [buildWebGL, buildWindows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          merge-multiple: true
+          path: dist
+
+      - name: Attach builds to GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          for f in dist/*.zip; do mv "$f" "${f%.zip}-$TAG.zip"; done
+          ls -la dist
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/*.zip --clobber
+          else
+            gh release create "$TAG" dist/*.zip --title "DearBoids $TAG" --generate-notes
+          fi
